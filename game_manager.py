@@ -15,6 +15,7 @@ from fighters.rahamim import Rahamim
 from typing import Dict, Union, Tuple, List
 
 
+"am i brunch?"
 class GameManager:
 
     def __init__(self):
