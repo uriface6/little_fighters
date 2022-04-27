@@ -34,7 +34,7 @@ class GameManager:
         while len(self.players_dict) > 1:
             self.round()
             self.end_round()
-        print(f"{list(self.players_dict.keys())[0]} is the Winner!!!!! heydad!!!")
+        print(f"{list(self.players_dict.keys())[0]} is the Winner!!!!!!!! heydad!!!")
 
 #
 #
