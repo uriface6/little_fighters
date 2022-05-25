@@ -1,22 +1,30 @@
 from enum import Enum
 
-
 MIN_PLAYERS = 2
 MAX_PLAYERS = 4
 
 DEFENSE_PRISE = 3
 
-FIGHTERS_DICT = {
-    "Haim": (100, 3, 2),
-    "Rahamim": (25, 14, 4),
-    "Field Barvaz": (70, 6, 3),
-    "Lital": (50, 8, 3)
-}
-MOVES_DICT = {
-    "Kamkiza": 1,
-    "Attack": 2,
-    "Defense": 3,
-}
+HAIM_HP = 100
+HAIM_STAMINA = 3
+HAIM_STRENGTH = 2
+
+RAHAMIM_HP = 25
+RAHAMIM_STAMINA = 14
+RAHAMIM_STRENGTH = 4
+
+LITAL_HP = 50
+LITAL_STAMINA = 8
+LITAL_STRENGTH = 3
+
+FIELD_BARVAZ_HP = 70
+FIELD_BARVAZ_STAMINA = 6
+FIELD_BARVAZ_STRENGTH = 3
+
+
+PIKATZU_HP = 60
+PIKATZU_STAMINA = 8
+PIKATZU_STRENGTH = 3
 
 
 class MoveType(Enum):

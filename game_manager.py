@@ -1,4 +1,10 @@
+import abc
+import importlib
+import sys
+
+import auxiliary_functions
 import constant
+import random
 
 from end_game_exception import EndGameException
 from game_state import GameState
@@ -7,7 +13,7 @@ from player import Player
 
 from fighters.field_barvaz import FieldBarvaz
 from fighters.haim import Haim
-from fighters.Lital import Lital
+from fighters.lital import Lital
 from fighters.rahamim import Rahamim
 
 from typing import Dict, Union, Tuple, List
@@ -17,15 +23,15 @@ from typing import Dict, Union, Tuple, List
 class GameManager:
 
     def __init__(self):
-        # self.fighters_dict: Dict[str, BaseFighter] = {}
-        # self.load_fighters()
+        self.optional_fighters_dict: Dict[str, abc.ABCMeta] = {}
+        self.load_fighters()
 
         self.players_list: List[Player] = []
 
     def game_manager(self):
-        # self.enter_menu()
-        self.init_test_game()
-        # self.rand_players()
+        self.enter_menu()
+        # self.init_test_game()
+        self.rand_players()
 
         try:
             while len(self.players_list) > 1:
@@ -44,66 +50,82 @@ class GameManager:
 
 #
 #
-    #
-    # def load_fighters(self):
-    #     fighters_dict_temp: Dict[str, BaseFighter] = {
-    #         "Field Barvaz": FieldBarvaz(),
-    #         "Haim": Haim(),
-    #         "Lital": Lital(),
-    #         "Rahamim": Rahamim()
-    #     }
-    #     self.fighters_dict = fighters_dict_temp
-    #
-    # def enter_menu(self):
-    #     print("Welcome to Little Fighter!!")
-    #     print("How much players do you play?")
-    #     players_num = GameManager.get_user_int_choice(constant.MIN_PLAYERS, constant.MAX_PLAYERS)
-    #     for i in range(players_num):
-    #         print(f"\nwelcome player {i+1}")
-    #         players_name = input("enter your name: ")
-    #         self.players_list[players_name] = Player(players_name, self.create_player())  # append(self.create_player())
-    #
-    #     self.print_players()
-    #
-    # def create_player(self) -> BaseFighter:
-    #     # players_name = input("enter your name: ")
-    #     print("choose your fighter")
-    #     for counter, fighter in enumerate(self.fighters_dict.keys()):
-    #         hp, stamina, strength = self.fighters_dict[fighter]
-    #         print(f"{counter + 1}. {fighter}: Hp - {hp}, Stamina - {stamina}, Strength - {strength}")
-    #     fighter_choice = GameManager.get_user_int_choice(1, len(self.fighters_dict.keys()))
-    #     fighter_choice_name = list(self.fighters_dict.keys())[fighter_choice - 1]
-    #     # temp_fighter = BaseFighter(*self.fighters_dict[fighter_choice_name], fighter_name=fighter_choice_name)
-    #     # return temp_fighter  # Player(players_name, temp_fighter)
-    #     # return self.fighters_dict[fighter_choice_name]
-    #     return copy.deepcopy(self.fighters_dict[fighter_choice_name])
-    #
-    # def rand_players(self):
-    #     temp_list = list(self.players_list.items())
-    #     random.shuffle(temp_list)
-    #     self.players_list = {k: v for k, v in temp_list}
-    #
-    #     self.print_players()
+
+    def load_fighters(self):
+        print("Welcome to Little Fighter!!")
+        self.optional_fighters_dict = auxiliary_functions.OPTIONAL_FIGHTERS_DICT
+        # print(type(self.optional_fighters_dict["Lital"]))
+        user_choice = 0
+        while user_choice != 2:
+            print("Do you want to add fighter? \n1. yes \n2. no:")
+            user_choice = auxiliary_functions.get_user_int_choice(1, 2)
+            if user_choice == 1:
+                new_fighter = self.get_fighter_class_from_path()
+                self.optional_fighters_dict[new_fighter[0]] = new_fighter[1]
+
+            else:
+                pass
+
+    @staticmethod
+    def get_fighter_class_from_path() -> Tuple[str, abc.ABCMeta]:
+        path = input("enter path: ")
+        # print(path)
+        # module_list = (path.replace('\\', '.').split('.')[-2:])
+        module_list = (path.split('\\')[-2:])
+        module_name = module_list[0] + '.' + module_list[1]
+        # print(module_name)
+        module = importlib.import_module(module_name)
+
+        class_name = module_name.split('.')[-1]
+        class_name = class_name[0].upper() + class_name[1:]
+        # print(class_name)
+        my_class = getattr(module, class_name)
+        return class_name, my_class
+
+    def enter_menu(self):
+        print("How much players do you play?")
+        players_num = auxiliary_functions.get_user_int_choice(constant.MIN_PLAYERS, constant.MAX_PLAYERS)
+        for i in range(players_num):
+            print(f"welcome player {i+1}")
+            players_name = input("enter your name: ")
+            self.players_list.append(Player(players_name, self.create_fighter()))
+
+        self.print_players()
+
+    def create_fighter(self) -> "BaseFighter":
+        print("choose your fighter:")
+        for counter, fighter in enumerate(self.optional_fighters_dict.keys(), 1):
+            # hp, stamina, strength = self.optional_fighters_dict[fighter]
+            # print(f"{counter + 1}. {fighter}: Hp - {hp}, Stamina - {stamina}, Strength - {strength}")
+            print(f"{counter}. {fighter}")
+        fighter_choice = auxiliary_functions.get_user_int_choice(1, len(self.optional_fighters_dict.keys()))
+        fighter_choice_name = list(self.optional_fighters_dict.keys())[fighter_choice - 1]
+        return self.optional_fighters_dict[fighter_choice_name]()
+
+    def rand_players(self):
+        random.shuffle(self.players_list)
+        self.print_players()
 
     def round(self):
-        round_moves: List[BaseMove] = []
+        round_moves: List[Tuple[BaseMove, GameState]] = []
         # !!!!!!!!!!!!!!! to-do
-        round_players: List[Player] = []
+        # round_players: List[Player] = []
         for curr_player in self.players_list:
             print(f"\nIt's {curr_player.name} turn:")
             my_game_state = GameState(self.players_list, curr_player)
             chosen_move = curr_player.choose_move(my_game_state)
             if chosen_move.move_type == constant.MoveType.SINGLE_MOVE:
-                round_moves = [chosen_move] + round_moves
-                round_players = [curr_player] + round_players
+                round_moves = [(chosen_move, my_game_state)] + round_moves
+                # round_players = [curr_player] + round_players
             else:
-                round_moves.append(chosen_move)
-                round_players.append(curr_player)
+                round_moves.append((chosen_move, my_game_state))
+                # round_players.append(curr_player)
 
-        for curr_move, curr_player1 in zip(round_moves, round_players):
+        # for curr_move, curr_player1 in zip(round_moves, round_players):
+        for curr_move in round_moves:
             # !!!!!!!!!!!!! to-do
-            my_game_state = GameState(self.players_list, curr_player1)
-            curr_move.play_move(my_game_state)
+            # my_game_state = GameState(self.players_list, curr_player1)
+            curr_move[0].play_move(curr_move[1])
 
     # def move_menu(self, curr_player: Player):
     #     print("choose your move:")

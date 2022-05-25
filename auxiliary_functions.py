@@ -1,3 +1,9 @@
+from fighters.lital import Lital
+from fighters.field_barvaz import FieldBarvaz
+from fighters.haim import Haim
+from fighters.rahamim import Rahamim
+
+
 def get_user_int_choice(min: int, max: int) -> int:
     # user_choice_str = ""
     user_choice_int = min - 1
@@ -9,3 +15,11 @@ def get_user_int_choice(min: int, max: int) -> int:
             print("Enter valid number!")
         print()
     return user_choice_int
+
+
+OPTIONAL_FIGHTERS_DICT = {
+    "Field Barvaz": FieldBarvaz,
+    "Haim": Haim,
+    "Lital": Lital,
+    "Rahamim": Rahamim
+}
